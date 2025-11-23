@@ -41,11 +41,18 @@ def get_last_visitor():
 
 def add_visitor(visitor_name):
     last_visitor_name, last_visitor_time = get_last_visitor()
+    current_time = datetime.now()
     
     if last_visitor_name == visitor_name:
         raise DuplicateVisitorError(f"{visitor_name} cannot visit twice in a row")
     
-    current_time = datetime.now()
+    if last_visitor_time is not None:
+        time_difference = current_time - last_visitor_time
+        minutes_passed = time_difference.total_seconds() / 60
+        
+        if minutes_passed < 5:
+            raise EarlyEntryError(f"Must wait {5 - minutes_passed:.1f} more minutes")
+    
     timestamp_str = current_time.isoformat()
     
     with open(FILENAME, 'a') as f:
