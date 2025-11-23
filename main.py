@@ -10,13 +10,46 @@ class EarlyEntryError(Exception):
 FILENAME = "visitors.txt"
 
 def ensure_file():
-    pass
+    if not os.path.exists(FILENAME):
+        with open(FILENAME, 'w') as f:
+            pass
 
 def get_last_visitor():
-    pass
+    if not os.path.exists(FILENAME):
+        return None, None
+    
+    with open(FILENAME, 'r') as f:
+        lines = f.readlines()
+    
+    if not lines:
+        return None, None
+    
+    last_line = lines[-1].strip()
+    
+    if not last_line:
+        return None, None
+    
+    parts = last_line.split(" | ")
+    
+    if len(parts) == 2:
+        name = parts[0]
+        timestamp_str = parts[1]
+        timestamp = datetime.fromisoformat(timestamp_str)
+        return name, timestamp
+    
+    return None, None
 
 def add_visitor(visitor_name):
-    pass
+    last_visitor_name, last_visitor_time = get_last_visitor()
+    
+    if last_visitor_name == visitor_name:
+        raise DuplicateVisitorError(f"{visitor_name} cannot visit twice in a row")
+    
+    current_time = datetime.now()
+    timestamp_str = current_time.isoformat()
+    
+    with open(FILENAME, 'a') as f:
+        f.write(f"{visitor_name} | {timestamp_str}\n")
 
 def main():
     ensure_file()
